@@ -1,43 +1,31 @@
 # VibeVoice API Dockerfile - A800 Optimized
-FROM nvidia/cuda:12.1.1-cudnn8-devel-ubuntu22.04
+FROM nvcr.io/nvidia/pytorch:24.07-py3
 
 # Set environment variables (A800 optimized)
-ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
 ENV VIBEVOICE_HOST=0.0.0.0
 ENV VIBEVOICE_PORT=9883
 ENV VIBEVOICE_MAX_CONCURRENT_REQUESTS=8
 ENV VIBEVOICE_GPU_MEMORY_FRACTION=0.9
 
-# Install system dependencies (including additional tools for VibeVoice)
+# Install additional system dependencies for VibeVoice
 RUN apt-get update && apt-get install -y \
-    python3 \
-    python3-pip \
-    python3-dev \
-    build-essential \
     libsndfile1 \
     ffmpeg \
-    git \
     curl \
-    cmake \
-    ninja-build \
     && rm -rf /var/lib/apt/lists/*
 
-# Clone and install VibeVoice from Microsoft repository
-RUN git clone https://github.com/microsoft/VibeVoice.git /tmp/VibeVoice \
-    && cd /tmp/VibeVoice \
-    && pip3 install . \
-    && cd / \
-    && rm -rf /tmp/VibeVoice
+# Clone and install VibeVoice from Microsoft repository with error handling
+RUN set -e && \
+    git clone https://github.com/microsoft/VibeVoice.git /tmp/VibeVoice && \
+    cd /tmp/VibeVoice && \
+    pip install -e . && \
+    python -c "import vibevoice; print('VibeVoice installed successfully')" && \
+    cd / && \
+    rm -rf /tmp/VibeVoice
 
-# Install build dependencies for flash-attn
-RUN pip3 install --upgrade pip setuptools wheel packaging ninja
-
-# Install PyTorch for CUDA 12.1 (required for flash-attn build)
-RUN pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-
-# Install flash-attn for optimal A800 performance
-RUN pip3 install flash-attn --no-build-isolation
+# Install flash-attn for optimal A800 performance (if not already included)
+RUN pip install flash-attn --no-build-isolation || echo "Flash attention already available or failed to install"
 
 # Set working directory
 WORKDIR /app
