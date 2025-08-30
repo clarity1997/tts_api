@@ -1,0 +1,68 @@
+# Docker Compose Override for Development Environment
+# This file extends docker-compose.yml for local development
+# Usage: docker-compose up (automatically includes override)
+
+version: '3.8'
+
+services:
+  vibevoice-api:
+    # Development Build (rebuild on changes)
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development  # Could be used if multi-stage build is added
+    
+    # Development Environment Variables
+    environment:
+      - VIBEVOICE_DEBUG=true
+      - VIBEVOICE_RELOAD=true
+      - VIBEVOICE_LOG_LEVEL=DEBUG
+      - VIBEVOICE_MODEL_NAME=VibeVoice-1.5B  # Use smaller model for dev
+      - VIBEVOICE_HUGGINGFACE_REPO_ID=microsoft/VibeVoice-1.5B
+      - VIBEVOICE_MAX_CONCURRENT_REQUESTS=2  # Reduced for development
+      - VIBEVOICE_GPU_MEMORY_FRACTION=0.7    # Use less GPU memory
+    
+    # Development Volume Mounts (enable hot reload)
+    volumes:
+      - model_cache:/app/models
+      - voice_cache:/app/voices  
+      - app_logs:/app/logs
+      - .:/app                               # Mount source code for development
+      - /app/__pycache__                     # Exclude Python cache
+      - /app/.git                            # Exclude git directory
+    
+    # Development Port (different from production)
+    ports:
+      - "8000:8000"  # Can be changed to 8001:8000 for parallel testing
+    
+    # Development Command (with auto-reload)
+    command: ["python3", "start.py", "--host", "0.0.0.0", "--port", "8000", "--reload", "--log-level", "DEBUG"]
+    
+    # Relaxed Health Check for Development
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 60s      # Less frequent checks
+      timeout: 15s       # More tolerance
+      retries: 2         # Fewer retries
+      start_period: 90s  # More startup time for debugging
+
+# Development-specific volumes (can be local directories)
+volumes:
+  model_cache:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./dev-data/models  # Development model storage
+  voice_cache:
+    driver: local
+    driver_opts:
+      type: none  
+      o: bind
+      device: ./voices
+  app_logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./dev-data/logs    # Development logs

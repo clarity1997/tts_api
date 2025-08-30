@@ -81,6 +81,14 @@ tmp/
 *.tmp
 *.bak
 
+# Docker data directories
+data/
+dev-data/
+docker-data/
+
+# Docker Compose override (keep for development)
+# docker-compose.override.yml
+
 # Package managers
 pip-log.txt
 pip-delete-this-directory.txt
@@ -117,3 +125,4 @@ pids
 *.pid
 *.seed
 *.pid.lock
+CLAUDE.md

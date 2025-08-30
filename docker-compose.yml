@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  vibevoice-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: vibevoice-api:latest
+    container_name: vibevoice-api-a800
+    
+    # GPU Configuration for A800
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    
+    # Environment Configuration
+    env_file:
+      - .env.a800
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    
+    # Port Mapping
+    ports:
+      - "8000:8000"
+    
+    # Volume Mounts for Persistence
+    volumes:
+      - model_cache:/app/models          # Persist downloaded models (~15GB)
+      - voice_cache:/app/voices          # Voice presets
+      - app_logs:/app/logs              # Application logs
+      - ./config.py:/app/config.py:ro   # Config file (read-only)
+      
+    # Restart Policy
+    restart: unless-stopped
+    
+    # Health Check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    
+    # Resource Limits (A800 optimized)
+    shm_size: '2gb'  # Shared memory for large model processing
+    
+    # Logging Configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
+
+# Named Volumes for Data Persistence
+volumes:
+  model_cache:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/models  # Local directory for model storage
+  voice_cache:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./voices
+  app_logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/logs
+
+# Networks
+networks:
+  default:
+    name: vibevoice-network
