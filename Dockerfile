@@ -1,5 +1,5 @@
 # VibeVoice API Dockerfile - A800 Optimized
-FROM nvcr.io/nvidia/pytorch:24.07-py3
+FROM nvcr.io/nvidia/pytorch:24.10-py3
 
 # Set environment variables (A800 optimized)
 ENV PYTHONUNBUFFERED=1
@@ -15,12 +15,32 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Clone and install VibeVoice from Microsoft repository with error handling
+# Clone and install VibeVoice from Microsoft repository with comprehensive error handling
 RUN set -e && \
     git clone https://github.com/microsoft/VibeVoice.git /tmp/VibeVoice && \
     cd /tmp/VibeVoice && \
     pip install -e . && \
-    python -c "import vibevoice; print('VibeVoice installed successfully')" && \
+    echo "Verifying VibeVoice installation..." && \
+    python -c "
+import sys
+print('Python version:', sys.version)
+print('Testing VibeVoice imports...')
+try:
+    import vibevoice
+    print('✓ vibevoice base module imported successfully')
+    from vibevoice.modular.configuration_vibevoice import VibeVoiceConfig
+    print('✓ VibeVoiceConfig imported successfully')
+    from vibevoice.modular.modeling_vibevoice_inference import VibeVoiceForConditionalGenerationInference
+    print('✓ VibeVoiceForConditionalGenerationInference imported successfully')
+    from vibevoice.processor.vibevoice_processor import VibeVoiceProcessor
+    print('✓ VibeVoiceProcessor imported successfully')
+    from vibevoice.modular.streamer import AudioStreamer
+    print('✓ AudioStreamer imported successfully')
+    print('All VibeVoice modules imported successfully!')
+except ImportError as e:
+    print('❌ Import error:', e)
+    sys.exit(1)
+" && \
     cd / && \
     rm -rf /tmp/VibeVoice
 
