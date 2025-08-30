@@ -26,9 +26,9 @@ RUN apt-get update && apt-get install -y \
 # Clone and install VibeVoice from Microsoft repository
 RUN git clone https://github.com/microsoft/VibeVoice.git /tmp/VibeVoice \
     && cd /tmp/VibeVoice \
-    && pip3 install -e . \
+    && pip3 install . \
     && cd / \
-    && rm -rf /tmp/VibeVoice/.git
+    && rm -rf /tmp/VibeVoice
 
 # Install flash-attn for optimal A800 performance
 RUN pip3 install flash-attn --no-build-isolation
