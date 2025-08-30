@@ -21,26 +21,12 @@ RUN set -e && \
     cd /tmp/VibeVoice && \
     pip install -e . && \
     echo "Verifying VibeVoice installation..." && \
-    python -c "
-import sys
-print('Python version:', sys.version)
-print('Testing VibeVoice imports...')
-try:
-    import vibevoice
-    print('✓ vibevoice base module imported successfully')
-    from vibevoice.modular.configuration_vibevoice import VibeVoiceConfig
-    print('✓ VibeVoiceConfig imported successfully')
-    from vibevoice.modular.modeling_vibevoice_inference import VibeVoiceForConditionalGenerationInference
-    print('✓ VibeVoiceForConditionalGenerationInference imported successfully')
-    from vibevoice.processor.vibevoice_processor import VibeVoiceProcessor
-    print('✓ VibeVoiceProcessor imported successfully')
-    from vibevoice.modular.streamer import AudioStreamer
-    print('✓ AudioStreamer imported successfully')
-    print('All VibeVoice modules imported successfully!')
-except ImportError as e:
-    print('❌ Import error:', e)
-    sys.exit(1)
-" && \
+    python -c "import vibevoice; print('✓ vibevoice base module imported')" && \
+    python -c "from vibevoice.modular.configuration_vibevoice import VibeVoiceConfig; print('✓ VibeVoiceConfig imported')" && \
+    python -c "from vibevoice.modular.modeling_vibevoice_inference import VibeVoiceForConditionalGenerationInference; print('✓ VibeVoiceForConditionalGenerationInference imported')" && \
+    python -c "from vibevoice.processor.vibevoice_processor import VibeVoiceProcessor; print('✓ VibeVoiceProcessor imported')" && \
+    python -c "from vibevoice.modular.streamer import AudioStreamer; print('✓ AudioStreamer imported')" && \
+    echo "All VibeVoice modules imported successfully!" && \
     cd / && \
     rm -rf /tmp/VibeVoice
 
