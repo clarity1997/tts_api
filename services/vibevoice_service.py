@@ -324,7 +324,16 @@ class VibeVoiceService:
             logger.info(f"Model outputs type: {type(outputs)}")
             logger.info(f"Model outputs attributes: {dir(outputs) if hasattr(outputs, '__dict__') else 'No attributes'}")
             
-            if hasattr(outputs, 'audio_codes') and outputs.audio_codes is not None:
+            if hasattr(outputs, 'speech_outputs') and outputs.speech_outputs is not None:
+                logger.info(f"Found speech_outputs with {len(outputs.speech_outputs)} items")
+                # VibeVoice输出格式：speech_outputs是一个包含tensor的list
+                if len(outputs.speech_outputs) > 0:
+                    audio_tensor = outputs.speech_outputs[0]  # 取第一个输出
+                    logger.info(f"Speech output tensor shape: {audio_tensor.shape}, dtype: {audio_tensor.dtype}")
+                    audio_array = self._decode_audio(audio_tensor)
+                else:
+                    raise RuntimeError("speech_outputs list is empty")
+            elif hasattr(outputs, 'audio_codes') and outputs.audio_codes is not None:
                 logger.info(f"Found audio_codes with shape: {outputs.audio_codes.shape}")
                 # Convert audio codes to waveform
                 audio_array = self._decode_audio(outputs.audio_codes)
