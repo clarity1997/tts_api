@@ -321,11 +321,25 @@ class VibeVoiceService:
             )
             
             # Extract audio from outputs
+            logger.info(f"Model outputs type: {type(outputs)}")
+            logger.info(f"Model outputs attributes: {dir(outputs) if hasattr(outputs, '__dict__') else 'No attributes'}")
+            
             if hasattr(outputs, 'audio_codes') and outputs.audio_codes is not None:
+                logger.info(f"Found audio_codes with shape: {outputs.audio_codes.shape}")
                 # Convert audio codes to waveform
                 audio_array = self._decode_audio(outputs.audio_codes)
+            elif hasattr(outputs, 'audio') and outputs.audio is not None:
+                logger.info(f"Found audio attribute with shape: {outputs.audio.shape}")
+                audio_array = self._decode_audio(outputs.audio)
+            elif hasattr(outputs, 'waveform') and outputs.waveform is not None:
+                logger.info(f"Found waveform attribute with shape: {outputs.waveform.shape}")
+                audio_array = self._decode_audio(outputs.waveform)
+            elif torch.is_tensor(outputs):
+                logger.info(f"Outputs is tensor with shape: {outputs.shape}")
+                audio_array = self._decode_audio(outputs)
             else:
-                raise RuntimeError("No audio generated from model")
+                logger.error(f"Model output structure: {outputs}")
+                raise RuntimeError("No audio generated from model - check output structure")
             
             generation_time = time.time() - start_time
             duration = len(audio_array) / self.settings.sample_rate
@@ -482,18 +496,28 @@ class VibeVoiceService:
     
     def _decode_audio(self, audio_codes) -> np.ndarray:
         """Decode audio codes to waveform"""
-        # This is a simplified implementation
-        # In the actual VibeVoice, this would use the proper decoder
+        logger.info(f"Decoding audio: type={type(audio_codes)}, tensor={torch.is_tensor(audio_codes)}")
+        
         if torch.is_tensor(audio_codes):
+            logger.info(f"Audio tensor shape: {audio_codes.shape}, dtype: {audio_codes.dtype}")
             if audio_codes.dtype == torch.bfloat16:
                 audio_codes = audio_codes.float()
             audio_array = audio_codes.cpu().numpy()
         else:
+            logger.info(f"Converting non-tensor audio: {type(audio_codes)}")
             audio_array = np.array(audio_codes)
+        
+        logger.info(f"Audio array shape before processing: {audio_array.shape}")
         
         # Ensure proper shape and type
         if len(audio_array.shape) > 1:
             audio_array = audio_array.squeeze()
+            
+        logger.info(f"Audio array final shape: {audio_array.shape}, dtype: {audio_array.dtype}")
+        
+        # Check if we have valid audio data
+        if audio_array.size == 0:
+            raise RuntimeError("Decoded audio array is empty")
         
         return audio_array.astype(np.float32)
     
