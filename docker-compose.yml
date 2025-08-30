@@ -24,9 +24,8 @@ services:
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=compute,utility
     
-    # Port Mapping
-    ports:
-      - "8000:8000"
+    # Network Mode (host for A800 performance)
+    network_mode: "host"
     
     # Volume Mounts for Persistence
     volumes:
@@ -77,7 +76,4 @@ volumes:
       o: bind
       device: ./data/logs
 
-# Networks
-networks:
-  default:
-    name: vibevoice-network
+# Networks (using host mode, no custom network needed)
