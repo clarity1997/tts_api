@@ -33,6 +33,9 @@ RUN git clone https://github.com/microsoft/VibeVoice.git /tmp/VibeVoice \
 # Install build dependencies for flash-attn
 RUN pip3 install --upgrade pip setuptools wheel packaging ninja
 
+# Install PyTorch for CUDA 12.1 (required for flash-attn build)
+RUN pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
 # Install flash-attn for optimal A800 performance
 RUN pip3 install flash-attn --no-build-isolation
 
