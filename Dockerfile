@@ -1,5 +1,5 @@
 # VibeVoice API Dockerfile - A800 Optimized
-FROM nvidia/cuda:12.1-devel-ubuntu20.04
+FROM nvidia/cuda:12.1-devel-ubuntu22.04
 
 # Set environment variables (A800 optimized)
 ENV DEBIAN_FRONTEND=noninteractive
