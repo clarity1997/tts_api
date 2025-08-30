@@ -30,6 +30,9 @@ RUN git clone https://github.com/microsoft/VibeVoice.git /tmp/VibeVoice \
     && cd / \
     && rm -rf /tmp/VibeVoice
 
+# Install build dependencies for flash-attn
+RUN pip3 install --upgrade pip setuptools wheel packaging ninja
+
 # Install flash-attn for optimal A800 performance
 RUN pip3 install flash-attn --no-build-isolation
 
