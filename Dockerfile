@@ -41,11 +41,11 @@ RUN useradd -m -u 1000 vibevoice && \
 USER vibevoice
 
 # Expose port
-EXPOSE 8000
+EXPOSE 9883
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+    CMD curl -f http://localhost:9883/health || exit 1
 
 # Start the application with A800 optimizations
-CMD ["python3", "start.py", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+CMD ["python3", "start.py", "--host", "0.0.0.0", "--port", "9883", "--workers", "1"]
