@@ -5,11 +5,11 @@ FROM nvidia/cuda:12.1-devel-ubuntu20.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
 ENV VIBEVOICE_HOST=0.0.0.0
-ENV VIBEVOICE_PORT=8000
+ENV VIBEVOICE_PORT=9883
 ENV VIBEVOICE_MAX_CONCURRENT_REQUESTS=8
 ENV VIBEVOICE_GPU_MEMORY_FRACTION=0.9
 
-# Install system dependencies
+# Install system dependencies (including additional tools for VibeVoice)
 RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
@@ -19,7 +19,19 @@ RUN apt-get update && apt-get install -y \
     ffmpeg \
     git \
     curl \
+    cmake \
+    ninja-build \
     && rm -rf /var/lib/apt/lists/*
+
+# Clone and install VibeVoice from Microsoft repository
+RUN git clone https://github.com/microsoft/VibeVoice.git /tmp/VibeVoice \
+    && cd /tmp/VibeVoice \
+    && pip3 install -e . \
+    && cd / \
+    && rm -rf /tmp/VibeVoice/.git
+
+# Install flash-attn for optimal A800 performance
+RUN pip3 install flash-attn --no-build-isolation
 
 # Set working directory
 WORKDIR /app
