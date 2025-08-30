@@ -16,19 +16,28 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Clone and install VibeVoice from Microsoft repository with comprehensive error handling
+# NOTE: We keep the source code as editable install requires it
 RUN set -e && \
-    git clone https://github.com/microsoft/VibeVoice.git /tmp/VibeVoice && \
-    cd /tmp/VibeVoice && \
+    echo "Cloning VibeVoice repository to /opt/VibeVoice..." && \
+    git clone https://github.com/microsoft/VibeVoice.git /opt/VibeVoice && \
+    cd /opt/VibeVoice && \
+    echo "Installing VibeVoice with editable mode..." && \
     pip install -e . && \
+    echo "Checking pip list for vibevoice..." && \
+    pip list | grep -i vibevoice && \
+    echo "Checking Python site-packages..." && \
+    python -c "import site; print('Site packages:', site.getsitepackages())" && \
     echo "Verifying VibeVoice installation..." && \
-    python -c "import vibevoice; print('✓ vibevoice base module imported')" && \
+    python -c "import sys; print('Python path:', sys.path)" && \
+    python -c "import vibevoice; print('✓ vibevoice base module imported from:', vibevoice.__file__)" && \
     python -c "from vibevoice.modular.configuration_vibevoice import VibeVoiceConfig; print('✓ VibeVoiceConfig imported')" && \
     python -c "from vibevoice.modular.modeling_vibevoice_inference import VibeVoiceForConditionalGenerationInference; print('✓ VibeVoiceForConditionalGenerationInference imported')" && \
     python -c "from vibevoice.processor.vibevoice_processor import VibeVoiceProcessor; print('✓ VibeVoiceProcessor imported')" && \
     python -c "from vibevoice.modular.streamer import AudioStreamer; print('✓ AudioStreamer imported')" && \
-    echo "All VibeVoice modules imported successfully!" && \
-    cd / && \
-    rm -rf /tmp/VibeVoice
+    echo "All VibeVoice modules imported successfully!"
+
+# Set PYTHONPATH to include VibeVoice
+ENV PYTHONPATH="/opt/VibeVoice:${PYTHONPATH}"
 
 # Install flash-attn for optimal A800 performance (if not already included)
 RUN pip install flash-attn --no-build-isolation || echo "Flash attention already available or failed to install"

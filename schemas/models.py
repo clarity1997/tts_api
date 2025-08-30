@@ -124,6 +124,8 @@ class ModelsResponse(BaseModel):
     current_model: str = Field(..., description="Currently loaded model")
     model_info: ModelInfo = Field(..., description="Model information")
     hardware: HardwareInfo = Field(..., description="Hardware information")
+    
+    model_config = {"protected_namespaces": ()}
 
 
 # System Status Models
@@ -133,6 +135,8 @@ class HealthResponse(BaseModel):
     model_loaded: bool = Field(..., description="Whether model is loaded")
     gpu_available: bool = Field(..., description="Whether GPU is available")
     timestamp: str = Field(..., description="Timestamp of health check")
+    
+    model_config = {"protected_namespaces": ()}
 
 
 class SystemStatusResponse(BaseModel):
@@ -144,6 +148,8 @@ class SystemStatusResponse(BaseModel):
     uptime_seconds: int = Field(..., ge=0, description="Service uptime in seconds")
     total_requests: int = Field(..., ge=0, description="Total requests processed")
     active_requests: int = Field(..., ge=0, description="Currently active requests")
+    
+    model_config = {"protected_namespaces": ()}
 
 
 # Error Models
