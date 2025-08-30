@@ -1,0 +1,36 @@
+# VibeVoice API Requirements
+
+# FastAPI and web server
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+sse-starlette==1.8.2
+
+# Pydantic settings management
+pydantic-settings==2.1.0
+
+# AI/ML dependencies
+torch>=2.0.0
+transformers==4.51.3
+accelerate==1.6.0
+diffusers>=0.24.0
+
+# Audio processing
+librosa>=0.10.0
+soundfile>=0.12.0
+scipy>=1.10.0
+numpy>=1.24.0
+
+# Additional ML utilities
+ml-collections>=0.1.0
+absl-py>=1.0.0
+
+# Media processing
+av>=10.0.0
+
+# Development and logging
+tqdm>=4.65.0
+
+# Optional: Performance monitoring (uncomment if needed)
+# psutil>=5.9.0
+# GPUtil>=1.4.0
